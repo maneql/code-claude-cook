@@ -1,0 +1,7 @@
+# Local and generated files - keep them out of the published kit.
+.claude/settings.local.json
+proposals/*.log
+docs/state/
+__pycache__/
+*.pyc
+*.xlsx

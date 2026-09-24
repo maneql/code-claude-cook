@@ -1,0 +1,66 @@
+{
+  "meta": {
+    "project": "Acme Todo",
+    "version": "v1.0",
+    "language": "English",
+    "generated": "2026-06-26",
+    "source": "docs/acme-todo-onboarding.md"
+  },
+  "sheets": [
+    { "name": "Overview", "type": "kv", "rows": [
+      ["Project", "Acme Todo"],
+      ["Purpose", "Personal task manager with reminders"],
+      ["Stack", ".NET 8 Web API + EF Core + Postgres; React frontend"],
+      ["Architecture", "API (Controllers -> Services -> EF repos) + SPA"],
+      ["Build / Run / Test", "dotnet build | dotnet run | dotnet test"],
+      ["Version / next", "v1.0 shipped; v1.1 = labels + recurring tasks"]
+    ]},
+    { "name": "Features", "type": "table",
+      "columns": ["ID","Feature","Module/Area","Description","User value","Inputs","Outputs","Business rules","Dependencies","Data touched","Acceptance criteria","Edge cases","Status","Priority","Notes"],
+      "rows": [
+        ["F-01","Create task","TasksController","Add a task with title/due date","Capture work fast","title, dueDate?","201 + task","title required; dueDate>=today","Auth","tasks","Given valid title When POST Then 201 + persisted","empty title -> 400","Done","High",""],
+        ["F-02","Complete task","TasksService","Mark a task done","Track progress","taskId","200","only owner can complete","Auth","tasks","Given own task When complete Then status=done","complete twice -> idempotent","Done","High",""],
+        ["F-03","Reminders","ReminderJob","Email when a task is due","Don't miss work","-","email","fire once per task at dueDate","SMTP, Hangfire","tasks,outbox","Given due task Then one email","DST / timezone","Partial","Med","needs tests"]
+      ]
+    },
+    { "name": "Data model", "type": "table",
+      "columns": ["Entity","Field","Type","Constraints","Relationships","Notes"],
+      "rows": [
+        ["Task","Id","Guid","PK","-","default newid()"],
+        ["Task","Title","string(200)","required","-",""],
+        ["Task","DueDate","DateTime?","-","-","UTC"],
+        ["Task","Status","enum","Open|Done","-",""],
+        ["Task","UserId","Guid","FK","User 1-* Task",""]
+      ]
+    },
+    { "name": "APIs & Interfaces", "type": "table",
+      "columns": ["Method","Path/Name","Auth","Request","Response","Errors","Feature ref"],
+      "rows": [
+        ["POST","/api/tasks","Bearer","{title,dueDate?}","201 {id,...}","400,401","F-01"],
+        ["POST","/api/tasks/{id}/complete","Bearer","-","200","401,403,404","F-02"]
+      ]
+    },
+    { "name": "Dependencies", "type": "table",
+      "columns": ["Name","Version","Purpose","Risk"],
+      "rows": [
+        ["EF Core","8.x","ORM","Low"],
+        ["Hangfire","1.8","Background jobs","Med - infra"],
+        ["Npgsql","8.x","Postgres driver","Low"]
+      ]
+    },
+    { "name": "Verification", "type": "table",
+      "columns": ["Area/Feature","How verified","Result","Issues"],
+      "rows": [
+        ["F-01 Create","dotnet test + POST smoke","PASS","-"],
+        ["F-03 Reminders","manual run","FAIL","duplicate emails on DST"]
+      ]
+    },
+    { "name": "Suggestions", "type": "table",
+      "columns": ["Area","Suggestion","Impact","Effort","Source"],
+      "rows": [
+        ["Reminders","Idempotency key per task/day","High","S","fix plan"],
+        ["API","Add pagination to GET /tasks","Med","S","optimizer"]
+      ]
+    }
+  ]
+}
